@@ -456,61 +456,6 @@ GetCost = res
 
 End Function
 
-Public Function GetMPYield1(Data As Integer) As Double
-
-Dim ProjectPower(7, 2), ProjectPPAs(7, 2), res() As Double
-
-'Nam chat
-'First param is the project power
-ProjectPower(1, 1) = 5.3
-'Second param is the project cost
-ProjectPower(1, 2) = 14.5
-'Nam Sou
-ProjectPower(2, 1) = 10.1
-ProjectPower(2, 2) = 24.5
-'Solar ACAS
-ProjectPower(3, 1) = 25
-ProjectPower(3, 2) = 31
-'Biomass Thailand
-ProjectPower(4, 1) = 4
-ProjectPower(4, 2) = 11
-'Wind Vietnam
-ProjectPower(5, 1) = 30
-ProjectPower(5, 2) = 47
-'Solar Bangladesh
-ProjectPower(6, 1) = 100
-ProjectPower(6, 2) = 120
-'Agricultural hydro
-ProjectPower(7, 1) = 2
-ProjectPower(7, 2) = 5.5
-
-'Laos hydro
-'First param is the project power
-ProjectPPAs(1, 1) = 0.065
-'Second param is the project cost
-ProjectPPAs(1, 2) = 54
-'Laos Solar
-ProjectPPAs(2, 1) = 0.08
-ProjectPPAs(2, 2) = 54
-'Bangladesh Solar
-ProjectPPAs(3, 1) = 0.11
-ProjectPPAs(3, 2) = 100
-'Wind Vietnam
-ProjectPPAs(4, 1) = 0.095
-ProjectPPAs(4, 2) = 30
-'Biomass Thailand
-ProjectPPAs(5, 1) = 0.095
-ProjectPPAs(5, 2) = 9
-'Agricultural hydro
-ProjectPPAs(6, 1) = 0.055
-ProjectPPAs(6, 2) = 1.6
-
-res = GetMPYield(ProjectPower, ProjectPPAs)
-
-GetMPYield1 = res(Data)
-
-End Function
-
 Private Function GetMPYield(ByRef ProjectPower As Variant, ByRef ProjectPPAs As Variant) As Double()
 
 Dim i As Integer
