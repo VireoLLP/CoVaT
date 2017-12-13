@@ -275,7 +275,7 @@ Next i
 Range("IRR").Cells(1, 1).Value = GetIRR(IRR)
 Range("EIRR").Cells(1, 1).Value = GetIRR(EIRR)
 
-Range("MPYield").Cells(1, 1).Value = GetMPYield1(3) * WorksheetFunction.Min(1.15, Range("EIRR").Cells(1, 1).Value / (Range("WACCParam").Cells(1, 1).Value / 100))
+Range("MPYield").Cells(1, 1).Value = GetMPYield1(3) * WorksheetFunction.Max(0.75, WorksheetFunction.Min(1.15, Range("EIRR").Cells(1, 1).Value / (Range("WACCParam").Cells(1, 1).Value / 100)))
 
 For i = 5 To 4 + CsP
     If i > 4 + CP + Delay + 1 Then
