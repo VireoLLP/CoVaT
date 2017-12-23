@@ -275,7 +275,7 @@ Next i
 Range("IRR").Cells(1, 1).Value = GetIRR(IRR)
 Range("EIRR").Cells(1, 1).Value = GetIRR(EIRR)
 
-Range("MPYield").Cells(1, 1).Value = GetMPYield1(3) * WorksheetFunction.Max(0.75, WorksheetFunction.Min(1.15, Range("EIRR").Cells(1, 1).Value / (Range("WACCParam").Cells(1, 1).Value / 100)))
+Range("MPYield").Cells(1, 1).Value = GetMPYield1(3) * WorksheetFunction.Max(0.9, WorksheetFunction.Min(1.1, Range("VireoRatios").Cells(2, 1).Value / Tools.GetAvgCashYield1()))
 
 For i = 5 To 4 + CsP
     If i > 4 + CP + Delay + 1 Then
