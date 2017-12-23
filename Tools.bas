@@ -457,6 +457,22 @@ GetCost = res
 
 End Function
 
+Private Function GetAvgCashYield(ByRef AvgCashYield As Variant) As Double
+
+Dim i As Integer
+Dim AvgCY, tmpSum As Double
+AvgCY = 0#
+tmpSum = 0#
+
+For i = 1 To UBound(AvgCashYield, 1)
+    tmpSum = tmpSum + AvgCashYield(i, 2)
+    AvgCY = AvgCY + AvgCashYield(i, 1) * AvgCashYield(i, 2)
+Next i
+
+GetAvgCashYield = AvgCY / tmpSum
+
+End Function
+                                                    
 Private Function GetMPYield(ByRef ProjectPower As Variant, ByRef ProjectPPAs As Variant) As Double()
 
 Dim i As Integer
