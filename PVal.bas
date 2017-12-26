@@ -150,13 +150,13 @@ FirstPeriod = 4 - ((CP + Delay) / 4 - WorksheetFunction.RoundDown((CP + Delay) /
 
 Worksheets("Graph Data").Cells(2, 1).Value = "Cash Forwards"
 Worksheets("Graph Data").Cells(2, 2).Value = 0#
-Worksheets("Graph Data").Cells(3, 1).Value = "Crop Forwards"
+Worksheets("Graph Data").Cells(3, 1).Value = "Crops Yield"
 Worksheets("Graph Data").Cells(3, 2).Value = 0#
 Worksheets("Graph Data").Cells(4, 1).Value = "Carbon Emission Reduction"
 Worksheets("Graph Data").Cells(4, 2).Value = 0#
 Worksheets("Graph Data").Cells(6, 1).Value = "Cash Yield Curve"
 Worksheets("Graph Data").Cells(6, 2).Value = 0#
-Worksheets("Graph Data").Cells(7, 1).Value = "Crop Yield Curve"
+Worksheets("Graph Data").Cells(7, 1).Value = "Avg Crops Yield Curve"
 Worksheets("Graph Data").Cells(7, 2).Value = 0#
 
 For i = 4 + CP + Delay To 4 + CP + Delay + FirstPeriod
