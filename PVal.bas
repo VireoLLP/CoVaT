@@ -275,6 +275,7 @@ Next i
 Range("IRR").Cells(1, 1).Value = GetIRR(IRR)
 Range("EIRR").Cells(1, 1).Value = GetIRR(EIRR)
 
+Worksheets("Summary").Range("VireoRatios").Cells(2, 1).Value = Round(AvgCashYield / (CsP - CP - Delay), 4)
 Range("MPYield").Cells(1, 1).Value = GetMPYield(DB_CostPower, DB_PPAs) * WorksheetFunction.Max(0.9, WorksheetFunction.Min(1.1, Range("VireoRatios").Cells(2, 1).Value / Tools.GetAvgCashYield(DB_ProjectCashYield)))
 
 For i = 5 To 4 + CsP
@@ -290,7 +291,6 @@ For i = 5 To 4 + CsP
 Next i
 
 Worksheets("Summary").Range("VireoRatios").Cells(1, 1).Value = Round(AvgCropYield / (CsP - CP - Delay), 4)
-Worksheets("Summary").Range("VireoRatios").Cells(2, 1).Value = Round(AvgCashYield / (CsP - CP - Delay), 4)
 
 'Computation of WACC
 Dim tmpInst As Variant
