@@ -1,4 +1,3 @@
-Attribute VB_Name = "Tools"
 Option Explicit
 Option Base 1
 
@@ -22,7 +21,6 @@ IssueDesignCT:
 Debug.Print "Error in designConstructionTable"
 
 End Sub
-
 Public Function designRiskTable(Optional ws As Worksheet = Empty, Optional ByVal Delay As Integer = -1) As Integer
 
 On Error GoTo RiskTableError
@@ -231,7 +229,7 @@ If CurPIPeriod = 0 Then
     Exit Function
 End If
 
-If Period <= CurPIPeriod Then
+If Period < CurPIPeriod Then
     GetProdIncRate = Range("PowerProdInc").Cells(1, 2).Value / 100
     Exit Function
 End If
@@ -246,7 +244,7 @@ For i = 2 To Range("PowerProdInc").Rows.count
     
     CurPIPeriod = CurPIPeriod + Range("PowerProdInc").Cells(i, 1).Value
     
-    If Period > PrevPIPeriod And Period <= CurPIPeriod Then
+    If Period > PrevPIPeriod And Period < CurPIPeriod Then
         GetProdIncRate = Range("PowerProdInc").Cells(i, 2).Value / 100
         Exit Function
     End If
@@ -376,173 +374,133 @@ End Sub
 
 Public Function GetCost(CostType As String, Revenues() As Double, Optional Rebate As Double = 0#, Optional Delay As Integer = -1) As Double()
 
-Dim res() As Double
+Dim Res() As Double
 Dim i, CP As Integer: CP = WorksheetFunction.RoundUp(Range("ConstrPeriod").Value * 4, 0)
 If Delay = -1 Then Delay = Range("Delay").Value
 
-ReDim res(UBound(Revenues))
+ReDim Res(UBound(Revenues))
 
 Select Case CostType
     Case "O&M":
         Select Case Worksheets("All Costs").OMBox.Value
             Case "Constant":
-                For i = 1 To UBound(res)
-                    If Revenues(i) > 0 Then res(i) = Round(WorksheetFunction.Max(Range("OMFloor").Cells(1, 1).Value / 4, Range("OMCste").Cells(1, 1).Value), 2)
+                For i = 1 To UBound(Res)
+                    If Revenues(i) > 0 Then Res(i) = Round(WorksheetFunction.Max(Range("OMFloor").Cells(1, 1).Value / 4, Range("OMCste").Cells(1, 1).Value), 2)
                 Next i
             Case "Multi":
-                For i = 1 To UBound(res)
+                For i = 1 To UBound(Res)
                     If Revenues(i) > 0 Then
-                        res(i) = Round(WorksheetFunction.Max(Revenues(i) * GetRate(i - CP - Delay, Worksheets("All Costs"), "OMMulti"), Range("OMFloor").Cells(1, 1).Value / 4), 2)
+                        Res(i) = Round(WorksheetFunction.Max(Revenues(i) * GetRate(i - CP - Delay, Worksheets("All Costs"), "OMMulti"), Range("OMFloor").Cells(1, 1).Value / 4), 2)
                     End If
                 Next i
             Case Else:
-                For i = 1 To UBound(res)
-                    res(i) = 0
+                For i = 1 To UBound(Res)
+                    Res(i) = 0
                 Next i
         End Select
     Case "SG&A":
         Select Case Worksheets("All Costs").SGABox.Value
             Case "Constant":
-                For i = 1 To UBound(res)
-                    If Revenues(i) > 0 Then res(i) = Round(WorksheetFunction.Max(Range("SGAFloor").Cells(1, 1).Value / 4, Range("SGACste").Cells(1, 1).Value), 2)
+                For i = 1 To UBound(Res)
+                    If Revenues(i) > 0 Then Res(i) = Round(WorksheetFunction.Max(Range("SGAFloor").Cells(1, 1).Value / 4, Range("SGACste").Cells(1, 1).Value), 2)
                 Next i
             Case "Multi":
-                For i = 1 To UBound(res)
+                For i = 1 To UBound(Res)
                     If Revenues(i) > 0 Then
-                        res(i) = Round(WorksheetFunction.Max(Revenues(i) * GetRate(i - CP - Delay, Worksheets("All Costs"), "SGAMulti"), Range("SGAFloor").Cells(1, 1).Value / 4), 2)
+                        Res(i) = Round(WorksheetFunction.Max(Revenues(i) * GetRate(i - CP - Delay, Worksheets("All Costs"), "SGAMulti"), Range("SGAFloor").Cells(1, 1).Value / 4), 2)
                     End If
                 Next i
             Case Else:
-                For i = 1 To UBound(res)
-                    res(i) = 0
+                For i = 1 To UBound(Res)
+                    Res(i) = 0
                 Next i
         End Select
     Case "Royalties":
         Select Case Worksheets("All Costs").RoyaltiesBox.Value
             Case "Constant":
-                For i = 1 To UBound(res)
-                    If Revenues(i) > 0 Then res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * Range("RoyaltiesCste").Cells(1, 1).Value / 100, 2), 0)
+                For i = 1 To UBound(Res)
+                    If Revenues(i) > 0 Then Res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * Range("RoyaltiesCste").Cells(1, 1).Value / 100, 2), 0)
                 Next i
             Case "Multi":
-                For i = 1 To UBound(res)
+                For i = 1 To UBound(Res)
                     If Revenues(i) > 0 Then
-                        res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * GetRate(i, Worksheets("All Costs"), "RoyaltiesMulti"), 2), 0)
+                        Res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * GetRate(i, Worksheets("All Costs"), "RoyaltiesMulti"), 2), 0)
                     End If
                 Next i
             Case Else:
-                For i = 1 To UBound(res)
-                    res(i) = 0
+                For i = 1 To UBound(Res)
+                    Res(i) = 0
                 Next i
         End Select
     Case "Taxes":
         Select Case Worksheets("All Costs").TaxesBox.Value
             Case "Constant":
-                For i = 1 To UBound(res)
-                    If Revenues(i) > 0 Then res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * Range("TaxesCste").Cells(1, 1).Value / 100, 2), 0)
+                For i = 1 To UBound(Res)
+                    If Revenues(i) > 0 Then Res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * Range("TaxesCste").Cells(1, 1).Value / 100, 2), 0)
                 Next i
             Case "Multi":
-                For i = 1 To UBound(res)
+                For i = 1 To UBound(Res)
                     If Revenues(i) > 0 Then
-                        res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * GetRate(i, Worksheets("All Costs"), "TaxesMulti"), 2), 0)
+                        Res(i) = WorksheetFunction.Max(Round((Revenues(i) - Rebate) * GetRate(i, Worksheets("All Costs"), "TaxesMulti"), 2), 0)
                     End If
                 Next i
             Case Else:
-                For i = 1 To UBound(res)
-                    res(i) = 0
+                For i = 1 To UBound(Res)
+                    Res(i) = 0
                 Next i
         End Select
 End Select
 
-GetCost = res
+GetCost = Res
 
 End Function
 
-Public Function GetMPYield1(Data As Integer) As Double
 
-Dim ProjectPower(7, 2), ProjectPPAs(7, 2), res() As Double
+Public Function GetAvgCashYield(ByRef ProjAvgCashYield As Variant, ByRef CoinsNotional As Variant) As Double
 
-'Nam chat
-'First param is the project power
-ProjectPower(1, 1) = 5.3
-'Second param is the project cost
-ProjectPower(1, 2) = 14.5
-'Nam Sou
-ProjectPower(2, 1) = 10.1
-ProjectPower(2, 2) = 24.5
-'Solar ACAS
-ProjectPower(3, 1) = 25
-ProjectPower(3, 2) = 31
-'Biomass Thailand
-ProjectPower(4, 1) = 4
-ProjectPower(4, 2) = 11
-'Wind Vietnam
-ProjectPower(5, 1) = 30
-ProjectPower(5, 2) = 47
-'Solar Bangladesh
-ProjectPower(6, 1) = 100
-ProjectPower(6, 2) = 120
-'Agricultural hydro
-ProjectPower(7, 1) = 2
-ProjectPower(7, 2) = 5.5
+Dim i As Integer
+Dim AvgCY, tmpSum As Double
+AvgCY = 0#
+tmpSum = 0#
 
-'Laos hydro
-'First param is the project power
-ProjectPPAs(1, 1) = 0.065
-'Second param is the project cost
-ProjectPPAs(1, 2) = 54
-'Laos Solar
-ProjectPPAs(2, 1) = 0.08
-ProjectPPAs(2, 2) = 54
-'Bangladesh Solar
-ProjectPPAs(3, 1) = 0.11
-ProjectPPAs(3, 2) = 100
-'Wind Vietnam
-ProjectPPAs(4, 1) = 0.095
-ProjectPPAs(4, 2) = 30
-'Biomass Thailand
-ProjectPPAs(5, 1) = 0.095
-ProjectPPAs(5, 2) = 9
-'Agricultural hydro
-ProjectPPAs(6, 1) = 0.055
-ProjectPPAs(6, 2) = 1.6
+For i = 1 To ProjAvgCashYield.count
+    tmpSum = tmpSum + CoinsNotional(i)
+    AvgCY = AvgCY + ProjAvgCashYield(i) * CoinsNotional(i)
+Next i
 
-res = GetMPYield(ProjectPower, ProjectPPAs)
-
-GetMPYield1 = res(Data)
+GetAvgCashYield = AvgCY / tmpSum
 
 End Function
-
-Private Function GetMPYield(ByRef ProjectPower As Variant, ByRef ProjectPPAs As Variant) As Double()
+Public Function GetMPYield(ByRef ProjectPower As Variant, ByRef ProjectPPAs As Variant, ByRef ProjectCosts As Variant) As Double()
 
 Dim i As Integer
 Dim AvgPrice1W, AvgPrice1kWh, tmpSum As Double
-Dim res(3) As Double
+Dim Res(3) As Double
 AvgPrice1W = 0#
 AvgPrice1kWh = 0#
 tmpSum = 0#
 
-For i = 1 To UBound(ProjectPower, 1)
-    tmpSum = tmpSum + ProjectPower(i, 1)
-    AvgPrice1W = AvgPrice1W + ProjectPower(i, 2)
+For i = 1 To ProjectPower.count
+    tmpSum = tmpSum + ProjectPower(i)
+    AvgPrice1W = AvgPrice1W + ProjectCosts(i)
 Next i
 
-res(1) = Math.Round(AvgPrice1W / tmpSum, 6)
+Res(1) = Math.Round(AvgPrice1W / tmpSum, 6)
 
 tmpSum = 0#
 
-For i = 1 To UBound(ProjectPPAs, 1)
-    tmpSum = tmpSum + ProjectPPAs(i, 2)
-    AvgPrice1kWh = AvgPrice1kWh + ProjectPPAs(i, 1) * ProjectPPAs(i, 2)
+For i = 1 To ProjectPPAs.count
+    tmpSum = tmpSum + ProjectPower(i)
+    AvgPrice1kWh = AvgPrice1kWh + ProjectPPAs(i) * ProjectPower(i)
 Next i
 
-res(2) = Math.Round(AvgPrice1kWh / tmpSum, 6)
+Res(2) = Math.Round(AvgPrice1kWh / tmpSum, 6)
 
-res(3) = Round((1 + Range("SecurityReturn1Y").Value) * WorksheetFunction.Power(res(1), res(2) / res(1)) - 1, 4)
+Res(3) = Round((1 + Range("SecurityReturn1Y").Value) * WorksheetFunction.Power(Res(1), Res(2) / Res(1)) - 1, 4)
 
-GetMPYield = res
+GetMPYield = Res
 
 End Function
-
 Public Function ComputeVireoShares(ByVal CoinEquityAmount As Double, ByVal Equities As Dictionary) As Double
 
 Dim TotalEquity, SubTotal, tmpCoinEq As Double
@@ -559,10 +517,10 @@ TotalEquity = SubTotal + CoinEquityAmount
 
 tmpCoinEq = WorksheetFunction.Min(Round(CoinEquityAmount / TotalEquity, 4), Range("CapEquity").Cells(1, 1).Value)
 
-Worksheets("Summary").Cells(9, 4).Value = tmpCoinEq
+Worksheets("Summary").Cells(10, 4).Value = tmpCoinEq
 
 For Each Equity In Equities.Items
-    Worksheets("Summary").Cells(6 + count, 4).Value = Round((1 - tmpCoinEq) * Equity.Amount * (1 + Equity.Appr) / SubTotal, 4)
+    Worksheets("Summary").Cells(7 + count, 4).Value = Round((1 - tmpCoinEq) * Equity.Amount * (1 + Equity.Appr) / SubTotal, 4)
     count = count + 1
 Next
 
