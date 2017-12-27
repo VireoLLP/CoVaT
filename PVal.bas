@@ -1,4 +1,3 @@
-Attribute VB_Name = "PVal"
 Option Explicit
 Option Base 1
 
@@ -9,7 +8,13 @@ Private CsP, CP, Delay As Integer
 Private CapexInc As Double
 Private AvgOM, AvgSGA, AvgRevenues As Double
 
-Public Sub Launch()
+Public Sub LaunchNoRisk()
+
+Call Launch(True)
+
+End Sub
+
+Public Sub Launch(Optional IsRisk As Boolean = False)
 
 Dim IsOk, IsFirstRound As Boolean: IsOk = True
 Dim InterestCoverage() As Double
@@ -97,6 +102,8 @@ Call YieldCurveSmoother(Worksheets("Graph Data").Range("$B$3:" & rngMax))
 ErrMsg = "GetCropsYield"
 Call GetCropsYield
 
+If Not IsRisk Then Call GetRiskIndicator
+
 Exit Sub
 EndAnalysis:
 MsgBox ("Error while proceeding to project analysis: issue with " & ErrMsg)
@@ -150,20 +157,30 @@ FirstPeriod = 4 - ((CP + Delay) / 4 - WorksheetFunction.RoundDown((CP + Delay) /
 
 Worksheets("Graph Data").Cells(2, 1).Value = "Cash Forwards"
 Worksheets("Graph Data").Cells(2, 2).Value = 0#
-Worksheets("Graph Data").Cells(3, 1).Value = "Crop Forwards"
+Worksheets("Graph Data").Cells(3, 1).Value = "Crops Yield"
 Worksheets("Graph Data").Cells(3, 2).Value = 0#
 Worksheets("Graph Data").Cells(4, 1).Value = "Carbon Emission Reduction"
 Worksheets("Graph Data").Cells(4, 2).Value = 0#
 Worksheets("Graph Data").Cells(6, 1).Value = "Cash Yield Curve"
 Worksheets("Graph Data").Cells(6, 2).Value = 0#
-Worksheets("Graph Data").Cells(7, 1).Value = "Crop Yield Curve"
+Worksheets("Graph Data").Cells(7, 1).Value = "Average Crops Yield Curve"
 Worksheets("Graph Data").Cells(7, 2).Value = 0#
+Worksheets("Graph Data").Cells(10, 1).Value = "Revenues"
+Worksheets("Graph Data").Cells(10, 2).Value = 0#
+Worksheets("Graph Data").Cells(11, 1).Value = "Expenses"
+Worksheets("Graph Data").Cells(11, 2).Value = 0#
+Worksheets("Graph Data").Cells(12, 1).Value = "Accumlated Project Cash"
+Worksheets("Graph Data").Cells(12, 2).Value = 0#
 
 For i = 4 + CP + Delay To 4 + CP + Delay + FirstPeriod
-    Worksheets("Graph Data").Cells(2, 2).Value = Worksheets("Graph Data").Cells(2, 2).Value + Round(Worksheets("CF").Cells(55, i).Value / FirstPeriod, 5)
-    Worksheets("Graph Data").Cells(3, 2).Value = Worksheets("Graph Data").Cells(3, 2).Value + Round(Worksheets("CF").Cells(56, i).Value / FirstPeriod, 5)
-    Worksheets("Graph Data").Cells(4, 2).Value = Worksheets("Graph Data").Cells(4, 2).Value + Worksheets("CF").Cells(57, i).Value
+    Worksheets("Graph Data").Cells(2, 2).Value = Worksheets("Graph Data").Cells(2, 2).Value + Round(Worksheets("CF").Cells(55, i).Value / FirstPeriod, 5)   'Crops
+    Worksheets("Graph Data").Cells(3, 2).Value = Worksheets("Graph Data").Cells(3, 2).Value + Round(Worksheets("CF").Cells(56, i).Value / FirstPeriod, 5)   'Cash
+    Worksheets("Graph Data").Cells(4, 2).Value = Worksheets("Graph Data").Cells(4, 2).Value + Worksheets("CF").Cells(57, i).Value                           'tCO2 Emissions reduction
+    Worksheets("Graph Data").Cells(10, 2).Value = Worksheets("Graph Data").Cells(10, 2).Value + Worksheets("CF").Cells(17, i).Value                           'Revenue
+    Worksheets("Graph Data").Cells(11, 2).Value = Worksheets("Graph Data").Cells(11, 2).Value + Worksheets("CF").Cells(18, i).Value + Worksheets("CF").Cells(19, i).Value + Worksheets("CF").Cells(20, i).Value + Worksheets("CF").Cells(33, i).Value + Worksheets("CF").Cells(46, i).Value 'Expenses
 Next i
+
+Worksheets("Graph Data").Cells(12, 2).Value = Worksheets("Graph Data").Cells(12, 2).Value + Worksheets("Graph Data").Cells(10, 2).Value - Worksheets("Graph Data").Cells(11, 2).Value       'Project Accumulated Cash
 
 AvgCashYield = Worksheets("Graph Data").Cells(2, 2).Value
 'AvgCropYield = Worksheets("Graph Data").Cells(3, 2).Value
@@ -178,12 +195,18 @@ For i = FirstPeriod To 4 + CsP Step 4
     Worksheets("Graph Data").Cells(2, Index).Value = 0#
     Worksheets("Graph Data").Cells(3, Index).Value = 0#
     Worksheets("Graph Data").Cells(4, Index).Value = 0#
+    Worksheets("Graph Data").Cells(10, Index).Value = 0#
+    Worksheets("Graph Data").Cells(11, Index).Value = 0#
+    Worksheets("Graph Data").Cells(12, Index).Value = 0#
     For j = 0 To WorksheetFunction.Min(3, 4 + CsP - i)
-        Worksheets("Graph Data").Cells(2, Index).Value = Worksheets("Graph Data").Cells(2, Index).Value + Worksheets("CF").Cells(55, i + j).Value
-        Worksheets("Graph Data").Cells(3, Index).Value = Worksheets("Graph Data").Cells(3, Index).Value + Worksheets("CF").Cells(56, i + j).Value
-        Worksheets("Graph Data").Cells(4, Index).Value = Worksheets("Graph Data").Cells(4, Index).Value + Worksheets("CF").Cells(57, i + j).Value
+        Worksheets("Graph Data").Cells(2, Index).Value = Worksheets("Graph Data").Cells(2, Index).Value + Worksheets("CF").Cells(55, i + j).Value                           'Crops
+        Worksheets("Graph Data").Cells(3, Index).Value = Worksheets("Graph Data").Cells(3, Index).Value + Worksheets("CF").Cells(56, i + j).Value                           'Cash
+        Worksheets("Graph Data").Cells(4, Index).Value = Worksheets("Graph Data").Cells(4, Index).Value + Worksheets("CF").Cells(57, i + j).Value                           'tCO2 Emissions
+        Worksheets("Graph Data").Cells(10, Index).Value = Worksheets("Graph Data").Cells(10, Index).Value + Worksheets("CF").Cells(17, i + j).Value                           'Revenue
+        Worksheets("Graph Data").Cells(11, Index).Value = Worksheets("Graph Data").Cells(11, Index).Value + Worksheets("CF").Cells(18, i + j).Value + Worksheets("CF").Cells(19, i + j).Value + Worksheets("CF").Cells(20, i + j).Value + Worksheets("CF").Cells(33, i + j).Value + Worksheets("CF").Cells(46, i + j).Value 'Expenses
     Next j
     
+    Worksheets("Graph Data").Cells(12, Index).Value = Worksheets("Graph Data").Cells(12, Index).Value + Worksheets("Graph Data").Cells(12, Index - 1).Value + Worksheets("Graph Data").Cells(10, Index - 1).Value - Worksheets("Graph Data").Cells(11, Index - 1).Value 'Project Accumulated Cash
     Worksheets("Graph Data").Cells(2, Index).Value = Math.Round(Worksheets("Graph Data").Cells(2, Index).Value / j, 5)
     Worksheets("Graph Data").Cells(3, Index).Value = Math.Round(Worksheets("Graph Data").Cells(3, Index).Value / j, 5)
     
@@ -198,31 +221,33 @@ End Sub
 Private Function GetCash0(ByVal IR1Y As Double) As Double
 
 Dim i As Integer
-Dim res As Double: res = 0#
+Dim Res As Double: Res = 0#
 Dim tmpNom1, tmpNom2 As Double: tmpNom1 = 0#
 
 For i = 5 To 4 + CP + Delay
     tmpNom1 = tmpNom1 + Coins.Nominal - Worksheets("CF").Cells(28, i).Value
     tmpNom2 = tmpNom2 + Worksheets("CF").Cells(14, i).Value
-    res = res + Worksheets("CF").Cells(50, i).Value
+    Res = Res + Worksheets("CF").Cells(50, i).Value
 Next i
 
 tmpNom1 = tmpNom1 / (CP + Delay) * 0.75 * IR1Y * (CP + Delay) / 12
 
-res = res * (1 + 0.5 * (CP + Delay) / 24 * IR1Y) + (Coins.Nominal - tmpNom2) + tmpNom1
+Res = Res * (1 + 0.5 * (CP + Delay) / 24 * IR1Y) + (Coins.Nominal - tmpNom2) + tmpNom1
 
-GetCash0 = res
+GetCash0 = Res
 
 End Function
 
 Private Sub GetDataForInvestors()
 
-Dim i As Integer
+Dim i, idx As Integer
 Dim PortionCashOut, VireoShares As Double
 Dim tmpVal As Double: tmpVal = 0#
 Dim IRR(), EIRR() As Variant
 Dim BenefCash0 As Double: BenefCash0 = Round(GetCash0(Range("SecurityReturn1Y").Cells(1, 1).Value) / (CsP - CP - Delay), 2)
 Dim AvgCashYield, AvgCropYield As Double
+Dim ProjectCost, ProjectPPA, ProjectCapacity, ProjectAvgCshYlds, ProjectCoinsNotional, ProjectNames As Range
+Dim MPYldRes, AvgCshYld As Double
 
 ReDim IRR(CsP)
 ReDim EIRR(CsP)
@@ -233,6 +258,9 @@ VireoShares = Tools.ComputeVireoShares(Coins.Conv * Coins.Nominal, Equities)
 
 Dim CoinQRepay As Double: CoinQRepay = Round(Coins.Nominal * Coins.Conv / (CsP - CP - Delay), 2)
 Dim AccNom As Double: AccNom = 0#
+Dim VireoDBFileName As String: VireoDBFileName = "Vireo_DB.xlsm"
+Dim VireoDBFilePathName As String: VireoDBFilePathName = ActiveWorkbook.Path & "\"
+Dim ProjectName As String: ProjectName = Range("ProjectName").Value
 
 For i = 5 To 4 + CsP
     tmpVal = Round(Worksheets("CF").Cells(48, i).Value * VireoShares * Range("CashDistrib").Cells(1, 1).Value / 100 + Worksheets("CF").Cells(32, i).Value, 2)
@@ -275,7 +303,28 @@ Next i
 Range("IRR").Cells(1, 1).Value = GetIRR(IRR)
 Range("EIRR").Cells(1, 1).Value = GetIRR(EIRR)
 
-Range("MPYield").Cells(1, 1).Value = GetMPYield1(3) * WorksheetFunction.Min(1.15, Range("EIRR").Cells(1, 1).Value / (Range("WACCParam").Cells(1, 1).Value / 100))
+Worksheets("Summary").Range("VireoRatios").Cells(2, 1).Value = Round(AvgCashYield / (CsP - CP - Delay), 4)
+
+Dim OpenedDB As Object: Set OpenedDB = DB.OpenDB(VireoDBFilePathName + VireoDBFileName)
+Dim OpenedDBSource As Worksheet: Set OpenedDBSource = DB.GetDBSource(OpenedDB, "VireoDB")
+Set ProjectNames = OpenedDBSource.Range("ProjNames")
+
+idx = Application.Match(ProjectName, ProjectNames, 1)
+OpenedDBSource.Range("VDBRef").Offset(idx, 1).Value = Round(AvgCashYield / (CsP - CP - Delay), 4)
+OpenedDBSource.Range("VDBRef").Offset(idx, 2).Value = Coins.Nominal / 1000000
+
+Set ProjectCost = OpenedDBSource.Range("ProjCosts")
+Set ProjectPPA = OpenedDBSource.Range("ProjPPAs")
+Set ProjectCapacity = OpenedDBSource.Range("ProjCapacities")
+Set ProjectAvgCshYlds = OpenedDBSource.Range("CashYld")
+Set ProjectCoinsNotional = OpenedDBSource.Range("CoinNotional")
+
+MPYldRes = Tools.GetMPYield(ProjectCapacity, ProjectPPA, ProjectCost)(3)
+AvgCshYld = Tools.GetAvgCashYield(ProjectAvgCshYlds, ProjectCoinsNotional)
+
+Call DB.CloseDB(OpenedDB, VireoDBFileName)
+
+Range("MPYield").Cells(1, 1).Value = MPYldRes * WorksheetFunction.Max(0.9, WorksheetFunction.Min(1.1, Range("VireoRatios").Cells(2, 1).Value / AvgCshYld))
 
 For i = 5 To 4 + CsP
     If i > 4 + CP + Delay + 1 Then
@@ -290,7 +339,6 @@ For i = 5 To 4 + CsP
 Next i
 
 Worksheets("Summary").Range("VireoRatios").Cells(1, 1).Value = Round(AvgCropYield / (CsP - CP - Delay), 4)
-Worksheets("Summary").Range("VireoRatios").Cells(2, 1).Value = Round(AvgCashYield / (CsP - CP - Delay), 4)
 
 'Computation of WACC
 Dim tmpInst As Variant
@@ -313,18 +361,18 @@ End Sub
 Private Function AdjustCoinNominal() As Double()
 
 Dim i As Integer
-Dim res() As Double: ReDim res(CP + Delay)
+Dim Res() As Double: ReDim Res(CP + Delay)
 Dim CoinIncrease As Double: CoinIncrease = 0#
 
 For i = 5 To 4 + CP + Delay
     CoinIncrease = CoinIncrease + Worksheets("CF").Cells(38, i).Value
-    res(i - 4) = Worksheets("CF").Cells(38, i).Value
+    Res(i - 4) = Worksheets("CF").Cells(38, i).Value
 Next i
 
 Coins.ChangeNominal (Coins.Nominal + CoinIncrease)
 Range("TotalCoinNotional").Value = Worksheets("Financing").Cells(16, 3).Value + CoinIncrease
 
-AdjustCoinNominal = res
+AdjustCoinNominal = Res
 
 End Function
 Private Sub RoyaltiesAndTaxes(Revenues() As Double)
@@ -371,9 +419,9 @@ Dim WK As Double: WK = WorksheetFunction.RoundUp(Range("WorkK").Value / 4, 2)
 Dim i, IRCovPer As Integer: IRCovPer = Range("InterestCovPeriod").Cells(1, 1).Value
 Dim CoinAddNom As Double: CoinAddNom = 0#
 Dim AccInt As Double: AccInt = 0#
-Dim res() As Double
+Dim Res() As Double
 
-ReDim res(CsP - Delay - CP)
+ReDim Res(CsP - Delay - CP)
 
 For i = 5 To 5 + Delay + CP + IRCovPer
     If Worksheets("CF").Cells(35, i).Value < 0 Then
@@ -386,15 +434,15 @@ For i = 5 To 5 + Delay + CP + IRCovPer
         Worksheets("CF").Cells(39, i).Value = WorksheetFunction.RoundUp(CoinAddNom * Coins.RateCP / 4, 2)
         Worksheets("CF").Cells(40, i).Value = Worksheets("CF").Cells(35, i).Value + Worksheets("CF").Cells(38, i).Value - Worksheets("CF").Cells(39, i).Value
     End If
-    If i > 5 + Delay + CP - 1 Then res(i - (5 + Delay + CP - 1)) = Worksheets("CF").Cells(40, i).Value
+    If i > 5 + Delay + CP - 1 Then Res(i - (5 + Delay + CP - 1)) = Worksheets("CF").Cells(40, i).Value
 Next i
 
 For i = 5 + Delay + CP + IRCovPer To 4 + CsP
     Worksheets("CF").Cells(40, i).Value = Worksheets("CF").Cells(35, i).Value + Worksheets("CF").Cells(38, i).Value - Worksheets("CF").Cells(39, i).Value
-    res(i - (5 + Delay + CP - 1)) = Worksheets("CF").Cells(40, i).Value
+    Res(i - (5 + Delay + CP - 1)) = Worksheets("CF").Cells(40, i).Value
 Next i
 
-CoverInterests = res
+CoverInterests = Res
 
 End Function
 
@@ -444,7 +492,7 @@ End Sub
 
 Private Function GetProduction() As Double()
 
-Dim DegRisk(), ClimRisk(), PPA(), res() As Double
+Dim DegRisk(), ClimRisk(), PPA(), Res() As Double
 Dim ws1 As Worksheet: Set ws1 = Worksheets("Deg Risk")
 Dim ws2 As Worksheet: Set ws2 = Worksheets("Clim Risk")
 Dim ws3 As Worksheet: Set ws3 = Worksheets("PPA")
@@ -478,17 +526,17 @@ Wend
 count = count - 1
 ReDim Preserve DegRisk(count)
 ReDim Preserve ClimRisk(count)
-ReDim res(count)
+ReDim Res(count)
 
 Dim MaxProd As Double: MaxProd = Range("PowerProd")(1, 1).Value * Range("PlantF")(1, 1).Value / 100 * 365 * 24 * (1 - (Range("Losses").Cells(1, 1).Value + Range("Losses").Cells(2, 1).Value) / 100)
 MaxProd = MaxProd / 4
 
 For i = 1 To count
-    res(i) = Round(DegRisk(i) * ClimRisk(i) * MaxProd, 2)
-    If i > CP + Delay Then res(i) = Round(res(i) * Tools.GetProdIncRate(i - CP - Delay) * PPA(i - CP - Delay), 2)
+    Res(i) = Round(DegRisk(i) * ClimRisk(i) * MaxProd, 2)
+    If i > CP + Delay Then Res(i) = Round(Res(i) * Tools.GetProdIncRate(i - CP - Delay) * PPA(i - CP - Delay), 2)
 Next i
 
-GetProduction = res
+GetProduction = Res
 
 End Function
 Private Sub DebtRepaymentAndInterest()
