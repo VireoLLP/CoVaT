@@ -1,4 +1,3 @@
-Attribute VB_Name = "Smoothing"
 Option Explicit
 Option Base 1
 
@@ -22,8 +21,8 @@ Public Sub YieldCurveSmoother(IValue As Range)
     
     nYrs = IValue.Columns.count
     
-    Set Grad = Worksheets("Graph Data").Range(Worksheets("Graph Data").Cells(10, 2), Worksheets("Graph Data").Cells(10 + nYrs - 2, 2))
-    Set Convex = Worksheets("Graph Data").Range(Worksheets("Graph Data").Cells(11, 3), Worksheets("Graph Data").Cells(10 + nYrs - 2, 3))
+    Set Grad = Worksheets("Graph Data").Range(Worksheets("Graph Data").Cells(15, 2), Worksheets("Graph Data").Cells(15 + nYrs - 2, 2))
+    Set Convex = Worksheets("Graph Data").Range(Worksheets("Graph Data").Cells(16, 3), Worksheets("Graph Data").Cells(16 + nYrs - 2, 3))
     
     For i = 1 To nYrs - 1
         Grad.Cells(i, 1).Formula = "=" & IValue.Cells(1, i + 1).Address & "-" & IValue.Cells(1, i).Address
@@ -41,11 +40,11 @@ Public Sub YieldCurveSmoother(IValue As Range)
         End If
     Next i
     
-    Worksheets("Graph Data").Range("$E$10").Formula = "=AVERAGE($B$3:" & IValue.Cells(1, nYrs).Address & ")"
+    Worksheets("Graph Data").Range("$A$100").Formula = "=AVERAGE($B$3:" & IValue.Cells(1, nYrs).Address & ")"
     
     'Global condition
     Dim AvgObj As Double: AvgObj = Functions.Average(IValue)
-    Application.Run "SolverAdd", "$E$10", 2, Application.WorksheetFunction.Text(AvgObj, "0.000%")
+    Application.Run "SolverAdd", "$A$100", 2, Application.WorksheetFunction.Text(AvgObj, "0.000%")
     Application.Run "SolverOk", IValue.Cells(1, 1).Address, 1, 0, IValue.Cells(1, 1).Address & ":" & IValue.Cells(1, nYrs).Address, 1, "GRG Nonlinear"
     Result = Application.Run("Solver.xlam!SolverSolve", True)
 
@@ -57,7 +56,7 @@ Public Sub YieldCurveSmoother(IValue As Range)
     
     Grad.ClearContents
     Convex.ClearContents
-    Worksheets("Graph Data").Range("$E$10").ClearContents
+    Worksheets("Graph Data").Range("$A$100").ClearContents
     
     ' report on success of analysis
     If Result <= 3 Then
@@ -113,4 +112,3 @@ Function sumPV(DF As Variant, Cpn As Double) As Double
     sumPV = sumPV + (1 + Cpn) * DF(UBound(DF))
 
 End Function
-

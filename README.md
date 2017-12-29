@@ -1,3 +1,3 @@
 # CoVaT
 Coin Valuation Tool
-V0.26
+V0.30
